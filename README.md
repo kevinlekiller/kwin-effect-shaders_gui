@@ -43,7 +43,7 @@ Click on the shader you want to enable, click `Apply`. Click `Save` if you want 
 
 You can also enable `Auto Save` in the `Settings` tab, which will automatically save the settings.
 
-![Shaders tab](https://github.com/kevinlekiller/kwin-effect-shaders/raw/main/images/shader_configuration.png)
+![Shaders tab](https://github.com/kevinlekiller/kwin-effect-shaders_gui/raw/main/images/shader_configuration.png)
 
 ## Blacklisting Applications
 In the configuration UI, in the `Settings` tab, you can add application(s), if more than 1, seperate them with a comma.
@@ -82,7 +82,7 @@ For example, with kate, the "Whole window class" is `kate org.kde.kate`, so the 
 
 Another example, lutris, the whole window class is `lutris` so the name would be lutris.
 
-![Find the application name](https://github.com/kevinlekiller/kwin-effect-shaders/raw/main/images/find_application_name.png)
+![Find the application name](https://github.com/kevinlekiller/kwin-effect-shaders_gui/raw/main/images/find_application_name.png)
 
 ## Enabling On Login
 In the configuration UI, in the `Settings` tab, you can set the `Enabled By Default` option.
