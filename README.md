@@ -39,7 +39,7 @@ Go to the `Action` tab, add `kwin-effect-shaders_gui` to the command, press `App
 ## Modifying The Shader Settings
 Open the configuration UI (see [Keyboard Shortcut](#keyboard-shortcut)), go to the `Shaders` tab.
 
-Click on the shader you want to enable, click `Apply`. Click `Save` if you want to write the changes to the settings file.
+Click on the shader you want to enable, click `Save`.
 
 You can also enable `Auto Save` in the `Settings` tab, which will automatically save the settings.
 
@@ -63,7 +63,7 @@ Only Kcalc and Kate will be processed.
 
 The list is not case sensitive.
 
-This is useful if you use the `Enabled by Default` option.
+This is useful if you use the `Auto Enable` option.
 
 You can use the `Blacklist` at the same time as the `Whitelist`.
 
@@ -85,7 +85,7 @@ Another example, lutris, the whole window class is `lutris` so the name would be
 ![Find the application name](https://github.com/kevinlekiller/kwin-effect-shaders_gui/raw/main/images/find_application_name.png)
 
 ## Enabling On Login
-In the configuration UI, in the `Settings` tab, you can set the `Enabled By Default` option.
+In the configuration UI, in the `Settings` tab, you can set the `Auto Enable` option.
 
 This will process all applications on login.
 
