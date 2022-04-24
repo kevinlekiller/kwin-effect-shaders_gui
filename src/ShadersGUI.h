@@ -36,7 +36,6 @@ public:
     ~ShadersGUI();
 
 private:
-    void updateShaderOrder();
     void processShaderPath(QString);
     void updateShadersText(QString);
     void updateShadersText(QByteArray);
@@ -58,6 +57,7 @@ private Q_SLOTS:
     void slotShaderSave();
     void slotMoveShaderUp();
     void slotMoveShaderDown();
+    void slotUpdateShaderOrder();
     void slotSettingsSave();
     void slotToggleShader(int, int);
     void slotEditShaderSetting(QTableWidgetItem  *);

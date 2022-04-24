@@ -50,6 +50,7 @@ ShadersGUI::ShadersGUI(QWidget *parent)
     connect(ui->button_SettingsSave, &QDialogButtonBox::clicked, this, &ShadersGUI::slotSettingsSave);
     connect(ui->button_MoveShaderUp, &QPushButton::clicked, this, &ShadersGUI::slotMoveShaderUp);
     connect(ui->button_MoveShaderDown, &QPushButton::clicked, this, &ShadersGUI::slotMoveShaderDown);
+    connect(ui->value_ShaderOrder->model(), &QAbstractItemModel::rowsMoved, this, &ShadersGUI::slotUpdateShaderOrder);
     connect(ui->table_Shaders, &QTableWidget::cellClicked, this, &ShadersGUI::slotToggleShader);
     connect(ui->table_Shaders, &QTableWidget::itemChanged, this, &ShadersGUI::slotEditShaderSetting);
 }
@@ -188,7 +189,7 @@ void ShadersGUI::slotMoveShaderUp() {
     int row = ui->value_ShaderOrder->currentRow();
     QListWidgetItem *item = ui->value_ShaderOrder->takeItem(row);
     ui->value_ShaderOrder->insertItem(--row, item);
-    updateShaderOrder();
+    slotUpdateShaderOrder();
     ui->value_ShaderOrder->setCurrentRow(row);
 }
 
@@ -199,7 +200,7 @@ void ShadersGUI::slotMoveShaderDown() {
     int row = ui->value_ShaderOrder->currentRow();
     QListWidgetItem *item = ui->value_ShaderOrder->takeItem(row);
     ui->value_ShaderOrder->insertItem(++row, item);
-    updateShaderOrder();
+    slotUpdateShaderOrder();
     ui->value_ShaderOrder->setCurrentRow(row);
 }
 
@@ -285,17 +286,17 @@ void ShadersGUI::slotEditShaderSetting(QTableWidgetItem *item) {
 /**
  * @brief If the user moves shaders up or down, update that here.
  */
-void ShadersGUI::updateShaderOrder() {
+void ShadersGUI::slotUpdateShaderOrder() {
     if (!ui->value_ShaderOrder->count()) {
         return;
     }
-    QString shadersText = QString(m_shadersText);
     QString order = "const int SHADER_ORDER[SHADERS+1] = int[] ( // Don't change this line.\n\n";
     for (int i = 0; i < ui->value_ShaderOrder->count(); ++i) {
-           order.append("    SHADER_").append(ui->value_ShaderOrder->item(i)->text()).append(",\n");
+        order.append("    SHADER_").append(ui->value_ShaderOrder->item(i)->text()).append(",\n");
     }
     order.append("\nSHADERS); //");
     QRegularExpression orderRegex("^const\\s+int\\s+SHADER_ORDER.+?^SHADERS\\);\\s+//", QRegularExpression::DotMatchesEverythingOption | QRegularExpression::MultilineOption);
+    QString shadersText = QString(m_shadersText);
     shadersText = shadersText.replace(orderRegex, order);
     updateShadersText(shadersText);
 }

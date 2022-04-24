@@ -245,8 +245,23 @@ You can find the description of value by leaving your mouse over it.</string>
         </item>
         <item row="0" column="0" colspan="2">
          <widget class="QListWidget" name="value_ShaderOrder">
+          <property name="acceptDrops">
+           <bool>false</bool>
+          </property>
+          <property name="dragEnabled">
+           <bool>true</bool>
+          </property>
+          <property name="dragDropMode">
+           <enum>QAbstractItemView::InternalMove</enum>
+          </property>
+          <property name="defaultDropAction">
+           <enum>Qt::MoveAction</enum>
+          </property>
           <property name="alternatingRowColors">
            <bool>true</bool>
+          </property>
+          <property name="selectionMode">
+           <enum>QAbstractItemView::ContiguousSelection</enum>
           </property>
          </widget>
         </item>
