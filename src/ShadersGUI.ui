@@ -189,6 +189,9 @@ To save the changes to the settings file, click save.
 If you have made changes but not saved anything, the Save button will display a star.
 You can find the description of value by leaving your mouse over it.</string>
           </property>
+          <property name="alternatingRowColors">
+           <bool>true</bool>
+          </property>
           <attribute name="horizontalHeaderCascadingSectionResizes">
            <bool>true</bool>
           </attribute>
@@ -241,7 +244,11 @@ You can find the description of value by leaving your mouse over it.</string>
          </widget>
         </item>
         <item row="0" column="0" colspan="2">
-         <widget class="QListWidget" name="value_ShaderOrder"/>
+         <widget class="QListWidget" name="value_ShaderOrder">
+          <property name="alternatingRowColors">
+           <bool>true</bool>
+          </property>
+         </widget>
         </item>
         <item row="2" column="0" colspan="2">
          <widget class="QDialogButtonBox" name="button_OrderSave">

@@ -19,7 +19,6 @@
 #include "./ui_ShadersGUI.h"
 #include <QDir>
 #include <QFile>
-#include <QScrollBar>
 #include <QStandardPaths>
 
 /**
