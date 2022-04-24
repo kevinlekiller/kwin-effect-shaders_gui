@@ -19,6 +19,7 @@
 #include "./ui_ShadersGUI.h"
 #include <QDir>
 #include <QFile>
+#include <QScrollBar>
 #include <QStandardPaths>
 
 /**
@@ -39,6 +40,7 @@ ShadersGUI::ShadersGUI(QWidget *parent)
     ui->button_OrderSave->setHidden(m_settings->value("AutoSave").toBool());
     ui->value_AutoEnable->setChecked(m_settings->value("AutoEnable").toBool());
     restoreGeometry(m_settings->value("WindowGeometry").toByteArray());
+    ui->tabWidget->setCurrentIndex(m_settings->value("LastTab").toInt());
     processShaderPath(m_settings->value("ShaderPath").toString());
     parseShadersText();
 
@@ -58,6 +60,7 @@ ShadersGUI::ShadersGUI(QWidget *parent)
  */
 ShadersGUI::~ShadersGUI() {
     m_settings->setValue("WindowGeometry", saveGeometry());
+    m_settings->setValue("LastTab", ui->tabWidget->currentIndex());
     delete m_settings;
     delete ui;
 }
