@@ -22,7 +22,7 @@
 
 int main(int argc, char *argv[]) {
     QApplication a(argc, argv);
-    QSystemSemaphore sem("kwin-effect-shader_gui-sem", QSystemSemaphore::Create);
+    QSystemSemaphore sem("kwin-effect-shader_gui-sem", 1, QSystemSemaphore::Open);
     if (!sem.acquire()) {
         return EXIT_FAILURE;
     }
