@@ -33,9 +33,8 @@ int main(int argc, char *argv[]) {
     if (shm.attach()) {
         sem.release();
         return EXIT_SUCCESS;
-    } else {
-        shm.create(1);
     }
+    shm.create(1);
     sem.release();
     ShadersGUI w;
     w.show();

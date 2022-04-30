@@ -42,5 +42,3 @@ cmake -DCMAKE_BUILD_TYPE="$RELEASE_TYPE" .. || exit $?
 make || exit $?
 
 sudo make install
-
-[[ $@ =~ UNINSTALL ]] && sudo make uninstall
