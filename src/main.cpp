@@ -18,24 +18,20 @@
 #include "ShadersGUI.h"
 #include <QApplication>
 #include <QSharedMemory>
-#include <QSystemSemaphore>
 
 int main(int argc, char *argv[]) {
     QApplication a(argc, argv);
-    QSystemSemaphore sem("kwin-effect-shader_gui-sem", 1, QSystemSemaphore::Open);
-    if (!sem.acquire()) {
+    QSharedMemory shm("kwin-effect-shader_gui-shm");
+    if (shm.attach(QSharedMemory::ReadOnly)) {
+        // In case previous process died unexpectedly. https://doc.qt.io/qt-5/qsharedmemory.html#details
+        shm.detach();
+        if (shm.attach(QSharedMemory::ReadOnly)) {
+            return EXIT_SUCCESS;
+        }
+    }
+    if (!shm.create(1, QSharedMemory::ReadOnly)) {
         return EXIT_FAILURE;
     }
-    QSharedMemory shm("kwin-effect-shader_gui-shm");
-    if (shm.isAttached()) {
-        shm.detach();
-    }
-    if (shm.attach()) {
-        sem.release();
-        return EXIT_SUCCESS;
-    }
-    shm.create(1);
-    sem.release();
     ShadersGUI w;
     w.show();
     int ret = a.exec();
