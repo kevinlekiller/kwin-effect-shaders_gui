@@ -2,7 +2,7 @@
 Configuration GUI for https://github.com/kevinlekiller/kwin-effect-shaders
 ## Installing
     git clone https://github.com/kevinlekiller/kwin-effect-shaders_gui
-    cd kwin-effect-shader_gui
+    cd kwin-effect-shaders_gui
     # Use the install.sh script:
     ./install.sh
 ## Uninstalling
