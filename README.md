@@ -47,6 +47,8 @@ The application name is first string in the `Whole window class` (delimited by t
 For example, with kate, the "Whole window class" is `kate org.kde.kate`, so the name to put in the `Blacklist` or `Whitelist` would be kate.\
 Another example, lutris, the whole window class is `lutris` so the name would be lutris.
 
+With Steam games, the name is `steam_app_APPID` (APPID is the App ID of the game, for example, with Half Life 2, it's 220 : https://steamdb.info/app/220/).
+
 ![Find the application name](https://github.com/kevinlekiller/kwin-effect-shaders_gui/raw/main/images/find_application_name.png)
 ## Enabling On Login
 In the configuration UI, in the `Settings` tab, you can set the `Auto Enable` option.\
