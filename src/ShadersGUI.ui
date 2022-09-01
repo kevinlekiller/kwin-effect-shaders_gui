@@ -313,10 +313,10 @@ You can find the description of value by leaving your mouse over it.</string>
          <widget class="QPlainTextEdit" name="value_Whitelist">
           <property name="toolTip">
            <string>The whitelist is unique per profile.
-Leaving the whitelist empty will process all applications,
-otherwise, only applications inside of the whitelist will be processed.
+Leaving the whitelist empty will process all applications.
+Otherwise, only applications inside of the whitelist will be processed.
 Seperate applications by a comma.
-Useful if you use &quot;Enabled By Default&quot;.
+Useful if you use &quot;Enabled By Default&quot;, or if you're using profiles.
 See the README for a guide on finding application names.</string>
           </property>
          </widget>
