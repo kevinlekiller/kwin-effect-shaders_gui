@@ -22,9 +22,7 @@ In the `Action` tab, add `kwin-effect-shaders_gui` to the command, press `Apply`
 ## Modifying The Shader Settings
 Open the configuration UI (see [Keyboard Shortcut](#keyboard-shortcut)), go to the `Shaders` tab.\
 Click on the shader you want to enable, click `Save`.\
-You can also enable `Auto Save` in the `Settings` tab, which will automatically save the settings.
-
-![Shaders tab](https://github.com/kevinlekiller/kwin-effect-shaders_gui/raw/main/images/shader_configuration.png)
+You can also enable `Auto Save` in the `Settings` tab, which will automatically save the settings.\
 ## Whitelisting Applications
 In the configuration UI, in the `Whitelist` tab, you can add application(s), if more than 1, seperate them with a comma.\
 For example: `kate,kcalc`\
