@@ -525,6 +525,9 @@ void ShadersGUI::slotEditShaderSetting(QTableWidgetItem *item) {
     if (settingValue.startsWith("vec3(")) {
         replacement.append("uniform vec3 ").append(settingName).append(" = ").append(settingValue).append(";");
         regex.append("^uniform\\s+vec3\\s+").append(settingName).append("\\s+=\\s+.+?").append(";");
+    } else if (settingValue.startsWith("vec2(")) {
+            replacement.append("uniform vec2 ").append(settingName).append(" = ").append(settingValue).append(";");
+            regex.append("^uniform\\s+vec2\\s+").append(settingName).append("\\s+=\\s+.+?").append(";");
     } else {
         replacement.append("#define ").append(settingName).append(" ").append(settingValue);
         regex.append("^#define\\s+").append(settingName).append("\\s+[\\d.]+");
