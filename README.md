@@ -1,5 +1,6 @@
 # KWin Effect Shaders GUI
 Configuration GUI for https://github.com/kevinlekiller/kwin-effect-shaders
+![GUI](https://github.com/kevinlekiller/kwin-effect-shaders_gui/raw/main/images/GUI.png)
 ## Installing
     git clone https://github.com/kevinlekiller/kwin-effect-shaders_gui
     cd kwin-effect-shaders_gui
@@ -47,7 +48,7 @@ With Steam games, the name is `steam_app_APPID` (APPID is the App ID of the game
 ![Find the application name](https://github.com/kevinlekiller/kwin-effect-shaders_gui/raw/main/images/find_application_name.png)
 ## Profiles
 You can add, remove, copy profiles in the Profiles tab.\
-Rename a profile by double clicking it.\
+Rename a profile by double clicking it.
 ## Enabling On Login
 In the configuration UI, in the `Settings` tab, you can set the `Auto Enable` option.\
 This will process all applications on login.\
