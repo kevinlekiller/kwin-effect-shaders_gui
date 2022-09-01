@@ -575,9 +575,9 @@ void ShadersGUI::parseShadersText() {
     QRegularExpression setting2Regex("^uniform\\s+.+?\\s+([A-Z0-9_]+)\\s+=\\s+(.+?);\\s*$");
 
     disconnect(ui->table_Shaders, &QTableWidget::itemChanged, this, &ShadersGUI::slotEditShaderSetting);
-    bool foundOrder = false, foundDefine = false, foundWhitelist = false, curShaderEnabled = false;
+    bool foundOrder = false, foundDefine = false, foundDesc = false, foundSource = false, foundWhitelist = false, curShaderEnabled = false;
     QStringList shaderOrder;
-    QString curShader, enabledShaders, curTooltip;
+    QString curShader, enabledShaders, curTooltip, shaderTooltip;
     for (int i = 0; i < lines.size(); ++i) {
         QString curLine = lines.at(i).trimmed();
 
@@ -607,6 +607,24 @@ void ShadersGUI::parseShadersText() {
             continue;
         }
 
+        // Get tooltip for the shader.
+        if (!foundSource) {
+            bool append = true;
+            if (curLine.startsWith("// Source: ")) {
+                foundSource = true;
+            } else if (!foundDesc && curLine.startsWith("// Description: ")) {
+                foundDesc = true;
+            } else if (foundDesc) {
+                append = true;
+            } else {
+                append = false;
+            }
+            if (append) {
+                shaderTooltip.append("<p>").append(curLine.remove(0, 2).trimmed()).append("</p>");
+            }
+            continue;
+        }
+
         // Find the start of shader's settings.
         if (!foundDefine) {
             QRegularExpressionMatch matches = enabledRegex.match(curLine);
@@ -620,6 +638,10 @@ void ShadersGUI::parseShadersText() {
                QTableWidgetItem *settingItem = new QTableWidgetItem(curShaderEnabled ? "On" : "Off");
                settingItem->setFlags(settingItem->flags() & ~Qt::ItemIsEditable);
                ui->table_Shaders->setItem(curTableRow, 1, settingItem);
+               if (!shaderTooltip.isEmpty()) {
+                   shaderTooltip.prepend("<html><head/><body>").append("</body></html>");
+                   settingItem->setToolTip(shaderTooltip);
+               }
                curTableRow++;
                if (curShaderEnabled) {
                    QString shortShader;
@@ -634,6 +656,9 @@ void ShadersGUI::parseShadersText() {
         // Reached the end of this shader's settings.
         if (curLine.startsWith("#endif")) {
             foundDefine = false;
+            foundSource = false;
+            foundDesc = false;
+            shaderTooltip.clear();
             continue;
         }
 
