@@ -19,7 +19,9 @@
 #include "./ui_ShadersGUI.h"
 #include <QDir>
 #include <QFile>
+#include <QLocalSocket>
 #include <QStandardPaths>
+#include <QTemporaryFile>
 
 /**
  * @brief Construct.
@@ -32,8 +34,6 @@ ShadersGUI::ShadersGUI(QWidget *parent)
     m_settings = new QSettings("kevinlekiller", "kwin_effect_shaders");
 
     // Set values on UI.
-    ui->value_Blacklist->setPlainText(m_settings->value("Blacklist").toString());
-    ui->value_Whitelist->setPlainText(m_settings->value("Whitelist").toString());
     ui->value_AutoSave->setChecked(m_settings->value("AutoSave").toBool());
     ui->button_ShadersSave->setHidden(m_settings->value("AutoSave").toBool());
     ui->button_OrderSave->setHidden(m_settings->value("AutoSave").toBool());
@@ -41,16 +41,22 @@ ShadersGUI::ShadersGUI(QWidget *parent)
     restoreGeometry(m_settings->value("WindowGeometry").toByteArray());
     ui->tabWidget->setCurrentIndex(m_settings->value("LastTab").toInt());
     processShaderPath(m_settings->value("ShaderPath").toString());
-    parseShadersText();
 
     // Setup connections.
     connect(ui->button_CloseWindow, &QDialogButtonBox::clicked, this, &ShadersGUI::slotCloseWindow);
     connect(ui->button_OrderSave, &QDialogButtonBox::clicked, this, &ShadersGUI::slotShaderSave);
     connect(ui->button_ShadersSave, &QDialogButtonBox::clicked, this, &ShadersGUI::slotShaderSave);
     connect(ui->button_SettingsSave, &QDialogButtonBox::clicked, this, &ShadersGUI::slotSettingsSave);
+    connect(ui->button_WhiteListSave, &QDialogButtonBox::clicked, this, &ShadersGUI::slotWhiteListSave);
     connect(ui->button_MoveShaderUp, &QPushButton::clicked, this, &ShadersGUI::slotMoveShaderUp);
     connect(ui->button_MoveShaderDown, &QPushButton::clicked, this, &ShadersGUI::slotMoveShaderDown);
+    connect(ui->button_ProfilesNew, &QPushButton::clicked, this, &ShadersGUI::slotProfileCreate);
+    connect(ui->button_ProfilesCopy, &QPushButton::clicked, this, &ShadersGUI::slotProfileCopy);
+    connect(ui->button_ProfilesRemove, &QPushButton::clicked, this, &ShadersGUI::slotProfileDelete);
+    connect(ui->table_Profiles, &QListWidget::itemChanged, this, &ShadersGUI::slotProfileRenamed);
+    connect(ui->table_Profiles, &QListWidget::itemClicked, this, &ShadersGUI::slotProfileMakeEditable);
     connect(ui->value_ShaderOrder->model(), &QAbstractItemModel::rowsMoved, this, &ShadersGUI::slotUpdateShaderOrder);
+    connect(ui->value_profileDropdown, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &ShadersGUI::slotProfileChange);
     connect(ui->table_Shaders, &QTableWidget::cellClicked, this, &ShadersGUI::slotToggleShader);
     connect(ui->table_Shaders, &QTableWidget::itemChanged, this, &ShadersGUI::slotEditShaderSetting);
 }
@@ -63,6 +69,17 @@ ShadersGUI::~ShadersGUI() {
     m_settings->setValue("LastTab", ui->tabWidget->currentIndex());
     delete m_settings;
     delete ui;
+}
+
+/**
+ * @brief If we changed the shader settings file, tell kwin_effect_shaders.
+ */
+void ShadersGUI::connectToServer() {
+    QLocalSocket socket;
+    socket.setServerName("kwin_effect_shaders");
+    socket.connectToServer();
+    socket.waitForConnected(250);
+    socket.close();
 }
 
 /**
@@ -94,31 +111,252 @@ void ShadersGUI::processShaderPath(QString shaderPath) {
         return;
     }
     m_shaderPath = shaderPath;
-    QDir shadersDir(shaderPath);
+    QDir shadersDir(m_shaderPath);
     if (!shadersDir.isReadable()) {
         return;
     }
+    m_settings->setValue("ShaderPath", m_shaderPath);
     ui->value_ShaderPath->setPlainText(m_shaderPath);
-    watchSettingsFile();
+
     m_shaderSettingsPath = m_shaderPath;
     m_shaderSettingsPath.append(m_shaderSettingsName);
-    if (!shadersDir.exists(m_shaderSettingsName)) {
-        QString exampleName = m_shaderSettingsPath;
-        exampleName.append(".example");
-        QFile exampleFile(exampleName);
-        if (!exampleFile.exists() || !exampleFile.copy(m_shaderSettingsPath)) {
-            exampleFile.close();
-            return;
-        }
-        exampleFile.close();
+
+    // Create Profiles dir.
+    shadersDir.mkdir("p");
+    m_profilesPath = shadersDir.absolutePath();
+    m_profilesPath.append("/p/");
+    setProfilesToUI();
+}
+
+/**
+ * @brief Adds the profiles to the UI.
+ */
+void ShadersGUI::setProfilesToUI() {
+    QDir profilesDir(m_profilesPath);
+
+    // Create iterator of .p files in profiles dir.
+    profilesDir.setNameFilters(QStringList() << "*.p");
+    profilesDir.setSorting(QDir::Name);
+    QStringList profiles(profilesDir.entryList());
+
+    // Reset UI values.
+    ui->value_profileDropdown->clear();
+    ui->table_Profiles->clear();
+
+    // No profile exists, copy 1_settings.glsl.example to X.p
+    if (profiles.isEmpty()) {
+        slotProfileCreate();
+        // Set profile as current profile.
+        setProfileActive(ui->value_profileDropdown->itemText(0));
+        ui->value_profileDropdown->setCurrentIndex(0);
+        return;
     }
+
+    bool foundActiveProfile = false;
+    // Iterate .p files.
+    for (auto &curProfile : profiles) {
+        curProfile.chop(2);
+        // Set profiles to UI.
+        ui->value_profileDropdown->addItem(curProfile);
+        ui->table_Profiles->addItem(curProfile);
+        if (QString::compare(m_settings->value("ActiveProfile").toString(), curProfile) == 0) {
+            foundActiveProfile = true;
+            setProfileActive(curProfile);
+        }
+    }
+    sortProfiles();
+    if (!foundActiveProfile) {
+        setProfileActive(ui->value_profileDropdown->itemText(0));
+        ui->value_profileDropdown->setCurrentIndex(0);
+    }
+}
+
+/**
+ * @brief User clicked button to create a new profile.
+ */
+void ShadersGUI::slotProfileCreate() {
+    QString examplePath(m_shaderSettingsPath);
+    examplePath.append(".example");
+    createProfileFile(examplePath);
+}
+
+/**
+ * @brief User clicked button to copy selected profile.
+ */
+void ShadersGUI::slotProfileCopy() {
+    // No item selected.
+    if (ui->table_Profiles->currentRow() < 0) {
+        return;
+    }
+    QListWidgetItem *currentItem(ui->table_Profiles->currentItem());
+    QString profileName(currentItem->text().trimmed());
+    if (profileName.isEmpty()) {
+        return;
+    }
+    QString profilePath(m_profilesPath);
+    profilePath.append(profileName).append(".p");
+    createProfileFile(profilePath);
+}
+
+/**
+ * @brief Creates a new profile based on a existing profile or the example profile.
+ * @param originalFilePath : Path to the original file that will be copied to make the new profile.
+ */
+void ShadersGUI::createProfileFile(QString originalFilePath) {
+    // Create file with unique name.
+    QTemporaryFile newProfile;
+    newProfile.setFileTemplate("ProfileXXXXXX.p");
+    newProfile.setAutoRemove(false);
+    // This creates the file.
+    newProfile.open();
+    newProfile.close();
+    // Delete the file, or it will fail when we try to copy.
+    QFile::remove(newProfile.fileName());
+    QFile oldFile(originalFilePath);
+    // Copy example file to new profile.
+    if (!oldFile.copy(newProfile.fileName())) {
+        return;
+    }
+    // Get the filename without path.
+    QFileInfo fInfo(newProfile.fileName());
+    QString newProfileName(fInfo.fileName());
+    QString newProfilePath(m_profilesPath);
+    newProfilePath.append(newProfileName);
+    // Move the file to the profiles dir.
+    QFile::rename(newProfile.fileName(), newProfilePath);
+    // Remove .p extension.
+    newProfileName.chop(2);
+    // Add profile to UI.
+    ui->value_profileDropdown->addItem(newProfileName);
+    ui->table_Profiles->addItem(newProfileName);
+    sortProfiles();
+}
+
+/**
+ * @brief User clicked button to delete selected profile.
+ */
+void ShadersGUI::slotProfileDelete() {
+    // No item selected.
+    if (ui->table_Profiles->currentRow() < 0) {
+        return;
+    }
+    // Don't remove last profile.
+    if (ui->table_Profiles->count() <= 1) {
+        return;
+    }
+    QListWidgetItem *currentItem(ui->table_Profiles->currentItem());
+    QString profileName(currentItem->text().trimmed());
+    if (profileName.isEmpty()) {
+        return;
+    }
+    // Remove profile from UI.
+    ui->table_Profiles->removeItemWidget(currentItem);
+    int comboIndex = ui->value_profileDropdown->findText(profileName);
+    if (comboIndex > -1) {
+        ui->value_profileDropdown->removeItem(comboIndex);
+    }
+    // Delete the actual file.
+    QString profilePath(m_profilesPath);
+    profilePath.append(profileName).append(".p");
+    QFile::remove(profilePath);
+    setProfilesToUI();
+}
+
+/**
+ * @brief Links the profile file to make it active.
+ * @param profile : Name of the profile to set active.
+ */
+void ShadersGUI::setProfileActive(QString profile) {
+    QString profilePath(m_profilesPath);
+    profilePath.append(profile).append(".p");
+    QFile profileFile(profilePath);
+    if (!profileFile.exists()) {
+        return;
+    }
+    unWatchSettingsFile();
+    QFile::remove(m_shaderSettingsPath);
+    QFile::link(profilePath, m_shaderSettingsPath);
     QFile settingsFile(m_shaderSettingsPath);
     if (!settingsFile.exists() || !settingsFile.open(QFile::ReadOnly)) {
         return;
     }
+    m_settings->setValue("ActiveProfile", profile);
     m_shadersText = settingsFile.readAll();
-    m_settings->setValue("ShaderPath", m_shaderPath);
-    unWatchSettingsFile();
+    watchSettingsFile();
+    ui->value_profileDropdown->setCurrentIndex(ui->value_profileDropdown->findText(profile));
+    parseShadersText();
+}
+
+/**
+ * @brief User changed the profile using the dropdown QComboBox.
+ * @param int index
+ */
+void ShadersGUI::slotProfileChange(int index) {
+    QString profileName(ui->value_profileDropdown->itemText(index));
+    if (profileName.isEmpty()) {
+        return;
+    }
+    setProfileActive(profileName);
+}
+
+/**
+ * @brief If any changes are made to the profiles, re-sort them.
+ */
+void ShadersGUI::sortProfiles() {
+    ui->table_Profiles->sortItems();
+    ui->value_profileDropdown->model()->sort(0, Qt::AscendingOrder);
+}
+
+/**
+ * @brief User renamed the profile.
+ * @param item
+ */
+void ShadersGUI::slotProfileRenamed(QListWidgetItem *item) {
+    QString oldProfileName = m_oldProfileName;
+    m_oldProfileName = item->text();
+    if (item->text().isEmpty() || QString::compare(item->text(), oldProfileName) == 0 || ui->value_profileDropdown->findText(item->text()) >= 0) {
+        disconnect(ui->table_Profiles, &QListWidget::itemChanged, this, &ShadersGUI::slotProfileRenamed);
+        item->setText(oldProfileName);
+        connect(ui->table_Profiles, &QListWidget::itemChanged, this, &ShadersGUI::slotProfileRenamed);
+        return;
+    }
+    QString newProfilePath(m_shaderPath);
+    newProfilePath.append("p/").append(item->text()).append(".p");
+    QFile newProfileFile(newProfilePath);
+    if (newProfileFile.exists()) {
+        disconnect(ui->table_Profiles, &QListWidget::itemChanged, this, &ShadersGUI::slotProfileRenamed);
+        item->setText(oldProfileName);
+        connect(ui->table_Profiles, &QListWidget::itemChanged, this, &ShadersGUI::slotProfileRenamed);
+        return;
+    }
+    QString oldProfilePath(m_shaderPath);
+    oldProfilePath.append("p/").append(oldProfileName).append(".p");
+    QFile oldProfileFile(oldProfilePath);
+    if (!oldProfileFile.copy(newProfilePath)) {
+        return;
+    }
+    QFile::remove(oldProfilePath);
+    if (QString::compare(m_settings->value("ActiveProfile").toString(), oldProfileName) == 0) {
+        setProfileActive(item->text());
+        ui->value_profileDropdown->setItemText(ui->value_profileDropdown->findText(oldProfileName), item->text());
+        sortProfiles();
+        ui->value_profileDropdown->setCurrentIndex(ui->value_profileDropdown->findText(item->text()));
+        return;
+    }
+    ui->value_profileDropdown->setItemText(ui->value_profileDropdown->findText(oldProfileName), item->text());
+    sortProfiles();
+}
+
+/**
+ * @brief QListWidget is non editable, so set the item to be editable any time the user clicks it.
+ *        Stores the current profile name in case the user is going to edit that profile name.
+ * @param item
+ */
+void ShadersGUI::slotProfileMakeEditable(QListWidgetItem *item) {
+    disconnect(ui->table_Profiles, &QListWidget::itemChanged, this, &ShadersGUI::slotProfileRenamed);
+    item->setFlags(item->flags() | Qt::ItemIsEditable);
+    m_oldProfileName = item->text();
+    connect(ui->table_Profiles, &QListWidget::itemChanged, this, &ShadersGUI::slotProfileRenamed);
 }
 
 /**
@@ -151,7 +389,7 @@ void ShadersGUI::watchSettingsFile() {
  * @param shadersText
  */
 void ShadersGUI::updateShadersText(QString shadersText) {
-    QByteArray text = shadersText.toUtf8();
+    QByteArray text(shadersText.toUtf8());
     updateShadersText(text);
 }
 
@@ -210,13 +448,27 @@ void ShadersGUI::slotMoveShaderDown() {
 void ShadersGUI::slotSettingsSave() {
     m_settings->sync();
     m_settings->setValue("ShaderPath", ui->value_ShaderPath->toPlainText());
-    m_settings->setValue("Blacklist", ui->value_Blacklist->toPlainText());
-    m_settings->setValue("Whitelist", ui->value_Whitelist->toPlainText());
     m_settings->setValue("AutoSave", ui->value_AutoSave->isChecked());
     ui->button_ShadersSave->setHidden(ui->value_AutoSave->isChecked());
     ui->button_OrderSave->setHidden(ui->value_AutoSave->isChecked());
-    m_settings->setValue("DefaultEnabled", ui->value_AutoEnable->isChecked());
+    m_settings->setValue("AutoEnable", ui->value_AutoEnable->isChecked());
     m_settings->sync();
+}
+
+/**
+ * @brief User requested saving the Whitelist.
+ */
+void ShadersGUI::slotWhiteListSave() {
+    m_settings->sync();
+    QString whiteList(ui->value_Whitelist->toPlainText().trimmed().replace(QString("\n"), QString(" ")).replace(QString("\t"), QString(" ")));
+    m_settings->setValue("Whitelist", whiteList);
+    m_settings->sync();
+    QString whiteListReplacement("//WHITELIST=\"");
+    whiteListReplacement.append(whiteList).append("\"");
+    QRegularExpression replaceRegex("^//WHITELIST=\".*?\"", QRegularExpression::MultilineOption);
+    QString shadersText(m_shadersText);
+    shadersText.replace(replaceRegex, whiteListReplacement);
+    updateShadersText(shadersText);
 }
 
 /**
@@ -299,6 +551,7 @@ void ShadersGUI::slotUpdateShaderOrder() {
     QString shadersText = QString(m_shadersText);
     shadersText = shadersText.replace(orderRegex, order);
     updateShadersText(shadersText);
+    connectToServer();
 }
 
 /**
@@ -318,7 +571,7 @@ void ShadersGUI::parseShadersText() {
     QRegularExpression setting2Regex("^uniform\\s+.+?\\s+([A-Z0-9_]+)\\s+=\\s+(.+?);\\s*$");
 
     disconnect(ui->table_Shaders, &QTableWidget::itemChanged, this, &ShadersGUI::slotEditShaderSetting);
-    bool foundOrder = false, foundDefine = false, curShaderEnabled = false;
+    bool foundOrder = false, foundDefine = false, foundWhitelist = false, curShaderEnabled = false;
     QStringList shaderOrder;
     QString curShader, enabledShaders, curTooltip;
     for (int i = 0; i < lines.size(); ++i) {
@@ -338,6 +591,16 @@ void ShadersGUI::parseShadersText() {
                 shaderOrder.append(curLine);
                 continue;
             }
+        }
+
+        // Find the whitelist.
+        if (!foundWhitelist && curLine.startsWith("//WHITELIST=\"")) {
+            foundWhitelist = true;
+            QString whiteList = curLine;
+            whiteList.remove(0, 13).chop(1);
+            ui->value_Whitelist->setPlainText(whiteList);
+            slotWhiteListSave();
+            continue;
         }
 
         // Find the start of shader's settings.
@@ -409,10 +672,14 @@ void ShadersGUI::parseShadersText() {
     if (enabledShaders.endsWith(", ")) {
         enabledShaders.chop(2);
         ui->value_ShadersEnabled->setText(enabledShaders);
+    } else {
+        ui->value_ShadersEnabled->setText("");
     }
     // Set the data on the shader order tab.
     ui->value_ShaderOrder->clear();
     ui->value_ShaderOrder->addItems(shaderOrder);
+    // Tell kwin_effect_shaders to reload.
+    connectToServer();
 }
 
 /**

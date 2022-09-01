@@ -24,33 +24,31 @@ Click on the shader you want to enable, click `Save`.\
 You can also enable `Auto Save` in the `Settings` tab, which will automatically save the settings.
 
 ![Shaders tab](https://github.com/kevinlekiller/kwin-effect-shaders_gui/raw/main/images/shader_configuration.png)
-## Blacklisting Applications
-In the configuration UI, in the `Settings` tab, you can add application(s), if more than 1, seperate them with a comma.\
-For example: `plasmashell,Firefox`\
-This will block the Plasma desktop and Firefox from being processed.\
-The list is not case sensitive.
 ## Whitelisting Applications
-In the configuration UI, in the `Settings` tab, you can add application(s), if more than 1, seperate them with a comma.\
+In the configuration UI, in the `Whitelist` tab, you can add application(s), if more than 1, seperate them with a comma.\
 For example: `kate,kcalc`\
 Only Kcalc and Kate will be processed.\
 The list is not case sensitive.\
 This is useful if you use the `Auto Enable` option.\
-You can use the `Blacklist` at the same time as the `Whitelist`.
+The Whitelist is saved to the current profile.\
 ## Finding Application Names
-To find an application name to use in the blacklist or whitelist, follow these steps:
+To find an application name to use in the whitelist, follow these steps:
 
 `System Settings -> Window Management -> Window Rules -> Add New...`
 
 If you're in a game, set it to windowed mode.\
 Click `Detect Window Properties`, click the application.\
 The application name is first string in the `Whole window class` (delimited by the space character).\
-For example, with kate, the "Whole window class" is `kate org.kde.kate`, so the name to put in the `Blacklist` or `Whitelist` would be kate.\
+For example, with kate, the "Whole window class" is `kate org.kde.kate`, so the name to put in `Whitelist` would be kate.\
 Another example, lutris, the whole window class is `lutris` so the name would be lutris.
 
 With Steam games, the name is `steam_app_APPID` (APPID is the App ID of the game, for example, with Half Life 2, it's 220 : https://steamdb.info/app/220/).
 
 ![Find the application name](https://github.com/kevinlekiller/kwin-effect-shaders_gui/raw/main/images/find_application_name.png)
+## Profiles
+You can add, remove, copy profiles in the Profiles tab.\
+Rename a profile by double clicking it.\
 ## Enabling On Login
 In the configuration UI, in the `Settings` tab, you can set the `Auto Enable` option.\
 This will process all applications on login.\
-You can exclude applications by using the `Blacklist` and/or `Whitelist`.
+You can process specific applications using the `Whitelist`.

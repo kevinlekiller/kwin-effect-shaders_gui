@@ -18,7 +18,30 @@
     <bool>true</bool>
    </property>
    <layout class="QGridLayout" name="gridLayout">
-    <item row="2" column="0">
+    <item row="0" column="0">
+     <widget class="QLabel" name="label_profileDropdown">
+      <property name="text">
+       <string>Profile:</string>
+      </property>
+     </widget>
+    </item>
+    <item row="3" column="1">
+     <widget class="QDialogButtonBox" name="button_CloseWindow">
+      <property name="toolTip">
+       <string>Closes the window.</string>
+      </property>
+      <property name="standardButtons">
+       <set>QDialogButtonBox::Close</set>
+      </property>
+      <property name="centerButtons">
+       <bool>true</bool>
+      </property>
+     </widget>
+    </item>
+    <item row="0" column="1">
+     <widget class="QComboBox" name="value_profileDropdown"/>
+    </item>
+    <item row="2" column="0" colspan="2">
      <widget class="QTabWidget" name="tabWidget">
       <property name="currentIndex">
        <number>2</number>
@@ -28,7 +51,7 @@
         <string>Settings</string>
        </attribute>
        <layout class="QGridLayout" name="gridLayout_2">
-        <item row="3" column="1">
+        <item row="1" column="1">
          <widget class="QCheckBox" name="value_AutoEnable">
           <property name="toolTip">
            <string>If this is enabled, the effect will be enabled on log in, you can still disable the effect using the keyboard shortcut.
@@ -40,44 +63,7 @@ You can use the Whitelist or Blacklist in conjunction with this.</string>
           </property>
          </widget>
         </item>
-        <item row="1" column="0">
-         <widget class="QLabel" name="label_Blacklist">
-          <property name="toolTip">
-           <string>Applications in this list will not be processed.
-Seperate applications by comma.</string>
-          </property>
-          <property name="text">
-           <string>Blacklist</string>
-          </property>
-         </widget>
-        </item>
         <item row="2" column="1">
-         <widget class="QPlainTextEdit" name="value_Whitelist">
-          <property name="toolTip">
-           <string>Applications outside of this list will not be processed.
-Seperate applications by a comma.
-Useful if you use &quot;Enabled By Default&quot;.</string>
-          </property>
-         </widget>
-        </item>
-        <item row="0" column="0">
-         <widget class="QLabel" name="label_ShaderPath">
-          <property name="toolTip">
-           <string>The path where the shader files are stored, must be the real full path.</string>
-          </property>
-          <property name="text">
-           <string>Shader Path</string>
-          </property>
-         </widget>
-        </item>
-        <item row="0" column="1">
-         <widget class="QPlainTextEdit" name="value_ShaderPath">
-          <property name="toolTip">
-           <string>The path where the shader files are stored, must be the real full path.</string>
-          </property>
-         </widget>
-        </item>
-        <item row="4" column="1">
          <widget class="QCheckBox" name="value_AutoSave">
           <property name="toolTip">
            <string>On the Shaders and Order tabs, if you change a value and this is enabled, it is applied instantly, without clicking the Save button.</string>
@@ -87,27 +73,24 @@ Useful if you use &quot;Enabled By Default&quot;.</string>
           </property>
          </widget>
         </item>
-        <item row="1" column="1">
-         <widget class="QPlainTextEdit" name="value_Blacklist">
-          <property name="toolTip">
-           <string>Applications in this list will not be processed.
-Seperate applications by comma.</string>
-          </property>
-         </widget>
-        </item>
         <item row="2" column="0">
-         <widget class="QLabel" name="label_Whitelist">
+         <widget class="QLabel" name="label_AutoSave">
           <property name="toolTip">
-           <string>Applications outside of this list will not be processed.
-Seperate applications by a comma.
-Useful if you use &quot;Enabled By Default&quot;.</string>
+           <string>On the Shaders and Order tabs, if you change a value and this is enabled, it is applied instantly, without clicking the Save button.</string>
           </property>
           <property name="text">
-           <string>Whitelist</string>
+           <string>Auto Save</string>
           </property>
          </widget>
         </item>
-        <item row="3" column="0">
+        <item row="0" column="1" alignment="Qt::AlignVCenter">
+         <widget class="QPlainTextEdit" name="value_ShaderPath">
+          <property name="toolTip">
+           <string>The path where the shader files are stored, must be the real full path.</string>
+          </property>
+         </widget>
+        </item>
+        <item row="1" column="0">
          <widget class="QLabel" name="label_AutoEnable">
           <property name="toolTip">
            <string>If this is enabled, the effect will be enabled on log in, you can still disable the effect using the keyboard shortcut.
@@ -119,17 +102,17 @@ You can use the Whitelist or Blacklist in conjunction with this.</string>
           </property>
          </widget>
         </item>
-        <item row="4" column="0">
-         <widget class="QLabel" name="label_AutoSave">
+        <item row="0" column="0" alignment="Qt::AlignVCenter">
+         <widget class="QLabel" name="label_ShaderPath">
           <property name="toolTip">
-           <string>On the Shaders and Order tabs, if you change a value and this is enabled, it is applied instantly, without clicking the Save button.</string>
+           <string>The path where the shader files are stored, must be the real full path.</string>
           </property>
           <property name="text">
-           <string>Auto Save</string>
+           <string>Shader Path</string>
           </property>
          </widget>
         </item>
-        <item row="5" column="0" colspan="2">
+        <item row="3" column="0" colspan="2">
          <widget class="QDialogButtonBox" name="button_SettingsSave">
           <property name="standardButtons">
            <set>QDialogButtonBox::Save</set>
@@ -167,19 +150,6 @@ You can use the Whitelist or Blacklist in conjunction with this.</string>
         <string>Shaders</string>
        </attribute>
        <layout class="QGridLayout" name="gridLayout_4">
-        <item row="2" column="1">
-         <widget class="QDialogButtonBox" name="button_ShadersSave">
-          <property name="toolTip">
-           <string>Save changes to the file.</string>
-          </property>
-          <property name="standardButtons">
-           <set>QDialogButtonBox::Save</set>
-          </property>
-          <property name="centerButtons">
-           <bool>true</bool>
-          </property>
-         </widget>
-        </item>
         <item row="1" column="0" colspan="2">
          <widget class="QTableWidget" name="table_Shaders">
           <property name="toolTip">
@@ -214,6 +184,19 @@ You can find the description of value by leaving your mouse over it.</string>
             <string>Value</string>
            </property>
           </column>
+         </widget>
+        </item>
+        <item row="2" column="1">
+         <widget class="QDialogButtonBox" name="button_ShadersSave">
+          <property name="toolTip">
+           <string>Save changes to the file.</string>
+          </property>
+          <property name="standardButtons">
+           <set>QDialogButtonBox::Save</set>
+          </property>
+          <property name="centerButtons">
+           <bool>true</bool>
+          </property>
          </widget>
         </item>
        </layout>
@@ -280,19 +263,76 @@ You can find the description of value by leaving your mouse over it.</string>
         </item>
        </layout>
       </widget>
-     </widget>
-    </item>
-    <item row="3" column="0">
-     <widget class="QDialogButtonBox" name="button_CloseWindow">
-      <property name="toolTip">
-       <string>Closes the window.</string>
-      </property>
-      <property name="standardButtons">
-       <set>QDialogButtonBox::Close</set>
-      </property>
-      <property name="centerButtons">
-       <bool>true</bool>
-      </property>
+      <widget class="QWidget" name="Profiles">
+       <attribute name="title">
+        <string>Profiles</string>
+       </attribute>
+       <layout class="QGridLayout" name="gridLayout_6">
+        <item row="1" column="2">
+         <widget class="QPushButton" name="button_ProfilesNew">
+          <property name="text">
+           <string>New</string>
+          </property>
+         </widget>
+        </item>
+        <item row="1" column="1">
+         <widget class="QPushButton" name="button_ProfilesCopy">
+          <property name="text">
+           <string>Copy</string>
+          </property>
+         </widget>
+        </item>
+        <item row="1" column="0">
+         <widget class="QPushButton" name="button_ProfilesRemove">
+          <property name="text">
+           <string>Remove</string>
+          </property>
+         </widget>
+        </item>
+        <item row="0" column="0" colspan="3">
+         <widget class="QListWidget" name="table_Profiles">
+          <property name="toolTip">
+           <string>List of profiles, double click to change the name, press enter to save.</string>
+          </property>
+          <property name="alternatingRowColors">
+           <bool>true</bool>
+          </property>
+          <property name="sortingEnabled">
+           <bool>false</bool>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </widget>
+      <widget class="QWidget" name="Whitelist">
+       <attribute name="title">
+        <string>Whitelist</string>
+       </attribute>
+       <layout class="QGridLayout" name="gridLayout_7">
+        <item row="0" column="0">
+         <widget class="QPlainTextEdit" name="value_Whitelist">
+          <property name="toolTip">
+           <string>The whitelist is unique per profile.
+Leaving the whitelist empty will process all applications,
+otherwise, only applications inside of the whitelist will be processed.
+Seperate applications by a comma.
+Useful if you use &quot;Enabled By Default&quot;.
+See the README for a guide on finding application names.</string>
+          </property>
+         </widget>
+        </item>
+        <item row="1" column="0">
+         <widget class="QDialogButtonBox" name="button_WhiteListSave">
+          <property name="standardButtons">
+           <set>QDialogButtonBox::Save</set>
+          </property>
+          <property name="centerButtons">
+           <bool>true</bool>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </widget>
      </widget>
     </item>
    </layout>

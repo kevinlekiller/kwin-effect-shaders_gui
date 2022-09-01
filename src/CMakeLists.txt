@@ -28,7 +28,7 @@ else()
     endif()
 endif()
 
-target_link_libraries(kwin-effect-shaders_gui PRIVATE Qt${QT_VERSION_MAJOR}::Widgets)
+target_link_libraries(kwin-effect-shaders_gui PUBLIC Qt${QT_VERSION_MAJOR}::Network PRIVATE Qt${QT_VERSION_MAJOR}::Widgets)
 
 set_target_properties(kwin-effect-shaders_gui PROPERTIES
     MACOSX_BUNDLE_GUI_IDENTIFIER my.example.com

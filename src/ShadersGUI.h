@@ -19,6 +19,7 @@
 #define SHADERSGUI_H
 
 #include <QFileSystemWatcher>
+#include <QListWidgetItem>
 #include <QMainWindow>
 #include <QSettings>
 #include <QTableWidgetItem>
@@ -42,16 +43,23 @@ private:
     void parseShadersText();
     void watchSettingsFile();
     void unWatchSettingsFile();
+    void sortProfiles();
+    void setProfileActive(QString);
+    void createProfileFile(QString);
+    void setProfilesToUI();
+    void connectToServer();
 
+    QString m_profilesPath;
     QString m_shaderPath;
     QString m_shaderSettingsPath;
+    QString m_oldProfileName;
     const QString m_shaderSettingsName = "1_settings.glsl";
     QByteArray m_shadersText;
     QFileSystemWatcher m_shaderSettingsWatcher;
     QSettings *m_settings;
     Ui::ShadersGUI *ui;
 
-private Q_SLOTS:
+//private Q_SLOTS:
     void slotCloseWindow();
     void slotShaderSettingsChanged();
     void slotShaderSave();
@@ -59,7 +67,14 @@ private Q_SLOTS:
     void slotMoveShaderDown();
     void slotUpdateShaderOrder();
     void slotSettingsSave();
+    void slotWhiteListSave();
+    void slotProfileCreate();
+    void slotProfileDelete();
+    void slotProfileCopy();
+    void slotProfileChange(int);
+    void slotProfileRenamed(QListWidgetItem *);
+    void slotProfileMakeEditable(QListWidgetItem *);
     void slotToggleShader(int, int);
-    void slotEditShaderSetting(QTableWidgetItem  *);
+    void slotEditShaderSetting(QTableWidgetItem *);
 };
 #endif // SHADERSGUI_H
