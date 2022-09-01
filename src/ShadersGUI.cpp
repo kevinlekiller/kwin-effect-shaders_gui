@@ -418,6 +418,7 @@ void ShadersGUI::slotShaderSave() {
     }
     settingsFile.write(m_shadersText);
     watchSettingsFile();
+    connectToServer();
 }
 
 /**
