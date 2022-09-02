@@ -523,17 +523,17 @@ void ShadersGUI::slotEditShaderSetting(QTableWidgetItem *item) {
 
     QString replacement, regex, verificationRegex;
     if (settingValue.startsWith("vec3(")) {
-        verificationRegex = "^vec3\\(([\\d]+\\.[\\d]+\\,\\s*){2}[\\d]+\\.[\\d]+\\)$";
+        verificationRegex = "^vec3\\((-?\\d+\\.\\d+\\,\\s*){2}-?\\d+\\.\\d+\\)$";
         replacement.append("uniform vec3 ").append(settingName).append(" = ").append(settingValue).append(";");
         regex.append("^uniform\\s+vec3\\s+").append(settingName).append("\\s+=\\s+.+?").append(";");
     } else if (settingValue.startsWith("vec2(")) {
-        verificationRegex = "^vec2\\([\\d]+\\.[\\d]+\\,\\s*[\\d]+\\.[\\d]+\\)$";
+        verificationRegex = "^vec2\\(-?\\d+\\.\\d+\\,\\s*-?\\d+\\.\\d+\\)$";
         replacement.append("uniform vec2 ").append(settingName).append(" = ").append(settingValue).append(";");
         regex.append("^uniform\\s+vec2\\s+").append(settingName).append("\\s+=\\s+.+?").append(";");
     } else {
-        verificationRegex = "^([\\d]+|[\\d]+\\.[\\d]+)$";
+        verificationRegex = "^(-?\\d+|-?\\d+\\.\\d+)$";
         replacement.append("#define ").append(settingName).append(" ").append(settingValue);
-        regex.append("^#define\\s+").append(settingName).append("\\s+[\\d.]+");
+        regex.append("^#define\\s+").append(settingName).append("\\s+[\\d.-]+");
     }
     // Validate input.
     QRegularExpression rev(verificationRegex);
