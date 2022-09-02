@@ -151,23 +151,24 @@ void ShadersGUI::setProfilesToUI() {
         ui->value_profileDropdown->setCurrentIndex(0);
         return;
     }
-
     bool foundActiveProfile = false;
+    QString activeProfile = m_settings->value("ActiveProfile").toString();
     // Iterate .p files.
     for (auto &curProfile : profiles) {
         curProfile.chop(2);
         // Set profiles to UI.
         ui->value_profileDropdown->addItem(curProfile);
         ui->table_Profiles->addItem(curProfile);
-        if (QString::compare(m_settings->value("ActiveProfile").toString(), curProfile) == 0) {
+        if (QString::compare(activeProfile, curProfile) == 0) {
             foundActiveProfile = true;
-            setProfileActive(curProfile);
         }
     }
     sortProfiles();
     if (!foundActiveProfile) {
         setProfileActive(ui->value_profileDropdown->itemText(0));
         ui->value_profileDropdown->setCurrentIndex(0);
+    } else {
+        setProfileActive(activeProfile);
     }
 }
 
@@ -281,6 +282,7 @@ void ShadersGUI::setProfileActive(QString profile) {
         return;
     }
     m_settings->setValue("ActiveProfile", profile);
+    m_settings->sync();
     m_shadersText = settingsFile.readAll();
     watchSettingsFile();
     ui->value_profileDropdown->setCurrentIndex(ui->value_profileDropdown->findText(profile));
