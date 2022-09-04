@@ -17,6 +17,7 @@
 
 #include "ShadersGUI.h"
 #include "./ui_ShadersGUI.h"
+//#include <QDebug>
 #include <QDir>
 #include <QFile>
 #include <QLocalSocket>
@@ -621,18 +622,24 @@ void ShadersGUI::parseShadersText() {
 
         // Get tooltip for the shader.
         if (!foundSource) {
-            bool append = true;
             if (curLine.startsWith("// Source: ")) {
                 foundSource = true;
             } else if (!foundDesc && curLine.startsWith("// Description: ")) {
                 foundDesc = true;
-            } else if (foundDesc) {
-                append = true;
-            } else {
-                append = false;
             }
-            if (append) {
-                shaderTooltip.append("<p>").append(curLine.remove(0, 2).trimmed()).append("</p>");
+            if (!foundDesc) {
+                continue;
+            }
+            // Remove the leading //
+            curLine = curLine.remove(0, 2).trimmed();
+            if (curLine.startsWith("Description: ")) {
+                shaderTooltip.append("<p>").append(curLine);
+            } else if (curLine.startsWith("Source: ")) {
+                shaderTooltip.append("</p><p>").append(curLine).append("</p>");
+            } else if (curLine.startsWith("License: ")) {
+                shaderTooltip.append("<p>").append(curLine).append("</p>");
+            } else {
+                shaderTooltip.append(" ").append(curLine);
             }
             continue;
         }
