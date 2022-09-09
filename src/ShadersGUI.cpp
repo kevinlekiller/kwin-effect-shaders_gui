@@ -80,8 +80,8 @@ void ShadersGUI::connectToSocket() {
     socket.setServerName("kwin_effect_shaders");
     socket.connectToServer();
     socket.waitForConnected(250);
-    if (!socket.waitForReadyRead(250) || ! socket.readAll().operator==("success\n")) {
-        // If the operation fails, revert back to previous values.
+    // If autosave is enabled and the operation fails, revert back to previous values.
+    if (!socket.waitForReadyRead(250) || !socket.readAll().operator==("success\n") && m_settings->value("AutoSave").toBool()) {
         m_shadersText.swap(m_prevShadersText);
         parseShadersText();
     }
