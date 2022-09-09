@@ -47,13 +47,14 @@ private:
     void setProfileActive(QString);
     void createProfileFile(QString);
     void setProfilesToUI();
-    void connectToServer();
+    void connectToSocket();
 
     QString m_profilesPath;
     QString m_shaderPath;
     QString m_shaderSettingsPath;
     QString m_oldProfileName;
     const QString m_shaderSettingsName = "1_settings.glsl";
+    QByteArray m_prevShadersText;
     QByteArray m_shadersText;
     QFileSystemWatcher m_shaderSettingsWatcher;
     QSettings *m_settings;

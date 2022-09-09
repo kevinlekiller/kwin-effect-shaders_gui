@@ -75,11 +75,16 @@ ShadersGUI::~ShadersGUI() {
 /**
  * @brief If we changed the shader settings file, tell kwin_effect_shaders.
  */
-void ShadersGUI::connectToServer() {
+void ShadersGUI::connectToSocket() {
     QLocalSocket socket;
     socket.setServerName("kwin_effect_shaders");
     socket.connectToServer();
     socket.waitForConnected(250);
+    if (!socket.waitForReadyRead(250) || ! socket.readAll().operator==("success\n")) {
+        // If the operation fails, revert back to previous values.
+        m_shadersText.swap(m_prevShadersText);
+        parseShadersText();
+    }
     socket.close();
 }
 
@@ -284,6 +289,8 @@ void ShadersGUI::setProfileActive(QString profile) {
     }
     m_settings->setValue("ActiveProfile", profile);
     m_settings->sync();
+    m_prevShadersText.clear();
+    m_prevShadersText.append(m_shadersText);
     m_shadersText = settingsFile.readAll();
     watchSettingsFile();
     ui->value_profileDropdown->setCurrentIndex(ui->value_profileDropdown->findText(profile));
@@ -404,6 +411,8 @@ void ShadersGUI::updateShadersText(QByteArray shadersText) {
     if (shadersText.operator==(m_shadersText)) {
         return;
     }
+    m_prevShadersText.clear();
+    m_prevShadersText.append(m_shadersText);
     m_shadersText.swap(shadersText);
     if (m_settings->value("AutoSave").toBool()) {
         slotShaderSave();
@@ -420,8 +429,9 @@ void ShadersGUI::slotShaderSave() {
         return;
     }
     settingsFile.write(m_shadersText);
+    settingsFile.close();
     watchSettingsFile();
-    connectToServer();
+    connectToSocket();
 }
 
 /**
@@ -568,7 +578,6 @@ void ShadersGUI::slotUpdateShaderOrder() {
     QString shadersText = QString(m_shadersText);
     shadersText = shadersText.replace(orderRegex, order);
     updateShadersText(shadersText);
-    connectToServer();
 }
 
 /**
@@ -726,8 +735,6 @@ void ShadersGUI::parseShadersText() {
     // Set the data on the shader order tab.
     ui->value_ShaderOrder->clear();
     ui->value_ShaderOrder->addItems(shaderOrder);
-    // Tell kwin_effect_shaders to reload.
-    connectToServer();
 }
 
 /**
